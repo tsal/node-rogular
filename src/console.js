@@ -19,6 +19,12 @@ var screenBuffer = {
         bottom: process.stdout.rows - 4,
         buffer: []
     },
+    messageArea: {
+        top: process.stdout.rows - 2,
+        left: 1,
+        right: process.stdout.columns - 1,
+        buffer: []
+    },
     toPrint: ''
 }
 
@@ -37,15 +43,27 @@ function getPrintable(tile) {
 
 function clearScreen() {
     process.stdout.write(escapeString + '[2J');
-    screenBuffer.statusArea.buffer = [];
     // TODO: make 24 configurable
     var bottom = process.stdout.rows > 24 ? 24 : process.stdout.rows;
     // TODO: make 4 configurable
+    screenBuffer.statusArea.buffer = [];
     screenBuffer.statusArea.bottom = bottom;
+    // TODO: make 30 configurable
+    screenBuffer.statusArea.right = 30;
     screenBuffer.mapArea.buffer = [];
+    // TODO: make 32 configurable
+    screenBuffer.mapArea.left = 32;
     screenBuffer.mapArea.bottom = bottom;
     // TODO: make 80 configurable
-    screenBuffer.mapArea.right = process.stdout.columns > 80 ? 80 : process.stdout.columns;
+    screenBuffer.mapArea.right = process.stdout.columns > 80 
+                                        ? 80 
+                                        : process.stdout.columns;
+
+    screenBuffer.messageArea.buffer = [];
+    screenBuffer.messageArea.top = bottom + 2;
+    screenBuffer.messageArea.right = process.stdout.columns > 80 
+                                        ? 80 
+                                        : process.stdout.columns;
 }
 
 function drawString(options) {
@@ -74,8 +92,8 @@ function updateStatusArea() {
     drawString({y:4, x:4, str:'30/30', color:GameOptions.ColorCodes.Green});
     drawString({y:6, x:4, str:Array(11).join('\u00bb'), color:GameOptions.ColorCodes.BrightBlue});
     drawString({y:7, x:4, str:'10/10', color:GameOptions.ColorCodes.Blue});
-    for (var i = 1; i < 19; i++) {
-        drawString({y:i, x:15, str:'\u2502', color:GameOptions.ColorCodes.Gray});
+    for (var i = 1; i <= screenBuffer.statusArea.bottom; i++) {
+        drawString({y:i, x:screenBuffer.statusArea.right + 1, str:'\u2502', color:GameOptions.ColorCodes.Gray});
     }
     flushScreenBuffer();
 }
@@ -86,8 +104,8 @@ function updateMapArea() {
     var playerY = screenBuffer.mapArea.top +
         Math.floor((screenBuffer.mapArea.bottom - screenBuffer.mapArea.top) / 2);
 
-    for(var x = screenBuffer.mapArea.left; x < screenBuffer.mapArea.right; x++) {
-        for(var y = screenBuffer.mapArea.top; y < screenBuffer.mapArea.bottom; y++) {
+    for(var x = screenBuffer.mapArea.left; x <= screenBuffer.mapArea.right; x++) {
+        for(var y = screenBuffer.mapArea.top; y <= screenBuffer.mapArea.bottom; y++) {
             var tile = game.getTile((playerY - y),-1*(playerX - x));
             var printable = getPrintable(tile);
 
@@ -137,6 +155,24 @@ function updateMapArea() {
 }
 
 function updateMessageArea() {
+    for(var i = screenBuffer.messageArea.left; i <= screenBuffer.messageArea.right; i++) {
+        drawString({
+            y: screenBuffer.messageArea.top -1,
+            x: i,
+            str: '\u2500',
+            color: GameOptions.ColorCodes.Gray
+        });
+    }
+
+    // add tee to join lines between status and message areas
+    drawString({
+        y: screenBuffer.statusArea.bottom + 1,
+        x: screenBuffer.statusArea.right + 1,
+        str: '\u2534',
+        color:GameOptions.ColorCodes.Gray
+    });
+
+    flushScreenBuffer();
     /*
     drawString({y:20, x:1, str:'You hit the rat!', color:GameOptions.ColorCodes.BrightRed});
     drawString({y:21, x:1, str:'The rat bites you!', color:GameOptions.ColorCodes.Red});

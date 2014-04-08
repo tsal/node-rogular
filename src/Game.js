@@ -5,7 +5,7 @@ var Map = require('./Map');
 
 function Game() {
     this.map = new Map();
-    this.map.generateMap(15, 15);
+    this.map.generateMap(40, 35);
     this.playerLocation = {x: 1, y: 1};
 
     this.emit('map_updated');
