@@ -1,0 +1,5 @@
+{
+    "FLOOR": "floor",
+    "WALL": "wall",
+    "EMPTY": "empty" 
+}

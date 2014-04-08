@@ -1,0 +1,31 @@
+{
+    "Keybindings": {
+        "Quit": "Q",
+        "MoveLeft": "h",
+        "MoveRight": "l",
+        "MoveDown": "j",
+        "MoveUp": "k"
+    },
+    "ColorCodes": {
+        "Black": "[30;22m",
+        "Gray": "[30;1m",
+        "Red": "[31;22m",
+        "BrightRed": "[31;1m",
+        "Green": "[32;22m",
+        "BrightGreen": "[32;1m",
+        "Brown": "[33;22m",
+        "Yellow": "[33;1m",
+        "Blue": "[34;22m",
+        "BrightBlue": "[34;1m",
+        "Magenta": "[35;22m",
+        "Pink": "[35;1m",
+        "Cyan": "[36;22m",
+        "BrightCyan": "[36;1m",
+        "White": "[37;22m",
+        "BrightWhite": "[37;1m",
+        "Default": "[m"
+    },
+    "Colors": {
+        "Player": "Yellow"
+    }
+}

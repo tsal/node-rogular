@@ -1,0 +1,14 @@
+{
+    "name": "roguelike",
+    "version": "0.0.1",
+    "author": "Chris Baker <dosman711@gmail.com",
+    "description": "A simple roguelike",
+    "license": "MIT",
+    "dependencies": {
+        "ws": "*",
+        "options": "*"
+    },
+    "engines": {
+        "node": ">0.10"
+    }
+}
