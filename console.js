@@ -1,7 +1,7 @@
 var Options = require('options');
-var Game = require('./Game');
-var TileTypes = require('./TileTypes');
-var GameOptions = require('./GameOptions');
+var Game = require('./lib/Game');
+var TileTypes = require('./lib/TileTypes');
+var GameOptions = require('./lib/GameOptions');
 
 var escapeString = '\u001B';
 var screenBuffer = {

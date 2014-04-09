@@ -1,14 +1,31 @@
 {
-    "name": "roguelike",
+    "name": "rogular",
     "version": "0.0.1",
     "author": "Chris Baker <dosman711@gmail.com",
     "description": "A simple roguelike",
     "license": "MIT",
+    "private": true,
+    "keywords": [
+        "roguelike",
+        "rogue",
+        "game"
+    ],
     "dependencies": {
         "ws": "*",
         "options": "*"
     },
+    "devDependencies": {
+        "mocha": "*"
+    },
     "engines": {
         "node": ">0.10"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/dosman711/node-rogular.git"
+    },
+    "scripts": {
+        "start": "nodejs console.js",
+        "test": "mocha"
     }
 }
