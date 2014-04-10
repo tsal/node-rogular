@@ -1,0 +1,8 @@
+{
+    "Natural": {
+        "Description": "Natural creatures, such as rats or pigs",
+        "baseHP": 10,
+        "baseMP": 10,
+        "hpMultiplier": 1
+    }
+}

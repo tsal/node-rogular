@@ -30,7 +30,9 @@ var screenBuffer = {
 
 function getPrintable(tile) {
     var retString = ' ';
-    if (tile.tileType === TileTypes.WALL) {
+    if (tile.entity !== null) {
+        retString = 'r';
+    } else if (tile.tileType === TileTypes.WALL) {
         retString = '#';
     } else if (tile.tileType === TileTypes.FLOOR) {
         retString = '.';
@@ -221,6 +223,7 @@ function handleInput(character) {
 
 var game = new Game();
 game.on('map_updated', updateMapArea);
+game.start();
 
 process.stdout.on('resize', redrawScreen);
 process.stdout.write('\033[?25l');
@@ -229,3 +232,4 @@ process.stdin.setRawMode(true);
 process.stdin.on('data', handleInput);
 
 redrawScreen();
+
