@@ -102,7 +102,7 @@ suite('Game', function() {
             sinon.assert.notCalled(spy);
         });
     });
-    suite('#getTile()', function() {
+    suite('#getTile(yOffset, xOffset)', function() {
         test('should return valid tile requiested', function() {
             var tile = game.getTile(1, 1);
             assert.equal(tile, game.map.tileMap[game.playerLocation.y + 1][game.playerLocation.x + 1]);
@@ -112,5 +112,12 @@ suite('Game', function() {
             assert.equal(tile.tileType, TileTypes.UNKNOWN);
         });
     });
-
+    suite('#isTilePassable(tile)', function(){
+        test('TileTypes.FLOOR should be passable', function() {
+            assert.isTrue(game.isTilePassable(new Tile({tileType: TileTypes.FLOOR})));
+        });
+        test('TileTypes.WALL should be impassable', function() {
+            assert.isFalse(game.isTilePassable(new Tile({tileType: TileTypes.WALL})));
+        });
+    });
 });

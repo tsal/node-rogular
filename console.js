@@ -137,19 +137,12 @@ function updateMapArea() {
         str:'@', 
         color:GameOptions.ColorCodes[GameOptions.Colors.Player]
     });
+    // TODO: remove this 
     drawString({
         x: 1,
         y: 30,
         str:'('+game.playerLocation.x+', '+game.playerLocation.y + ')    '
     });
-    /*
-    drawString({
-        x:playerX+1, 
-        y:playerY, 
-        str:'r', 
-        color:GameOptions.ColorCodes.BrightWhite
-    });
-    */
     
     flushScreenBuffer();
 }
@@ -226,14 +219,13 @@ function handleInput(character) {
     }
 }
 
-process.stdout.write('\033[?25l');
 var game = new Game();
 game.on('map_updated', updateMapArea);
 
+process.stdout.on('resize', redrawScreen);
+process.stdout.write('\033[?25l');
+
 process.stdin.setRawMode(true);
+process.stdin.on('data', handleInput);
 
 redrawScreen();
-
-process.stdout.on('resize', redrawScreen);
-
-process.stdin.on('data', handleInput);
