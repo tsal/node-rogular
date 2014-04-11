@@ -149,7 +149,7 @@ function updateMapArea() {
     flushScreenBuffer();
 }
 
-function updateMessageArea() {
+function updateMessageArea(message) {
     for(var i = screenBuffer.messageArea.left; i <= screenBuffer.messageArea.right; i++) {
         drawString({
             y: screenBuffer.messageArea.top -1,
@@ -166,13 +166,16 @@ function updateMessageArea() {
         str: '\u2534',
         color:GameOptions.ColorCodes.Gray
     });
+    if (message && message.length > 0) {
+        drawString({
+            y: screenBuffer.messageArea.top,
+            x: screenBuffer.messageArea.left,
+            str: message + '             ',
+            color: GameOptions.ColorCodes.Red
+        });
+    }
 
     flushScreenBuffer();
-    /*
-    drawString({y:20, x:1, str:'You hit the rat!', color:GameOptions.ColorCodes.BrightRed});
-    drawString({y:21, x:1, str:'The rat bites you!', color:GameOptions.ColorCodes.Red});
-    drawString({y:22, x:1, str:'You found a short sword', color:GameOptions.ColorCodes.White});
-    */
 }
 
 function redrawScreen() {
@@ -214,15 +217,17 @@ function handleInput(character) {
     } catch (err) {
         var cleanupMsg = escapeString + '[2J';
         cleanupMsg += escapeString + '[H';
-        cleanupMessage += escapeString + GameOptions.ColorCodes.Default;
-        cleanupMessage += escapeString + '[?25h';
+        cleanupMsg += escapeString + GameOptions.ColorCodes.Default;
+        cleanupMsg += escapeString + '[?25h';
         console.log(cleanupMsg);
         console.log(err);
+        process.exit(1);
     }
 }
 
 var game = new Game();
 game.on('map_updated', updateMapArea);
+game.on('message', updateMessageArea);
 game.start();
 
 process.stdout.on('resize', redrawScreen);
