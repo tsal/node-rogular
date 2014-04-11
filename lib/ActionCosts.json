@@ -1,0 +1,6 @@
+{
+    "movement": 100,
+    "attack": {
+        "unarmed": 100
+    }
+}

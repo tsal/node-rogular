@@ -1,7 +1,7 @@
 var Options = require('options');
-var Game = require('./Game');
-var TileTypes = require('./TileTypes');
-var GameOptions = require('./GameOptions');
+var Game = require('./lib/Game');
+var TileTypes = require('./lib/TileTypes');
+var GameOptions = require('./lib/GameOptions');
 
 var escapeString = '\u001B';
 var screenBuffer = {
@@ -19,12 +19,20 @@ var screenBuffer = {
         bottom: process.stdout.rows - 4,
         buffer: []
     },
+    messageArea: {
+        top: process.stdout.rows - 2,
+        left: 1,
+        right: process.stdout.columns - 1,
+        buffer: []
+    },
     toPrint: ''
 }
 
 function getPrintable(tile) {
     var retString = ' ';
-    if (tile.tileType === TileTypes.WALL) {
+    if (tile.entity !== null) {
+        retString = 'r';
+    } else if (tile.tileType === TileTypes.WALL) {
         retString = '#';
     } else if (tile.tileType === TileTypes.FLOOR) {
         retString = '.';
@@ -37,15 +45,27 @@ function getPrintable(tile) {
 
 function clearScreen() {
     process.stdout.write(escapeString + '[2J');
-    screenBuffer.statusArea.buffer = [];
     // TODO: make 24 configurable
     var bottom = process.stdout.rows > 24 ? 24 : process.stdout.rows;
     // TODO: make 4 configurable
+    screenBuffer.statusArea.buffer = [];
     screenBuffer.statusArea.bottom = bottom;
+    // TODO: make 30 configurable
+    screenBuffer.statusArea.right = 30;
     screenBuffer.mapArea.buffer = [];
+    // TODO: make 32 configurable
+    screenBuffer.mapArea.left = 32;
     screenBuffer.mapArea.bottom = bottom;
     // TODO: make 80 configurable
-    screenBuffer.mapArea.right = process.stdout.columns > 80 ? 80 : process.stdout.columns;
+    screenBuffer.mapArea.right = process.stdout.columns > 80 
+                                        ? 80 
+                                        : process.stdout.columns;
+
+    screenBuffer.messageArea.buffer = [];
+    screenBuffer.messageArea.top = bottom + 2;
+    screenBuffer.messageArea.right = process.stdout.columns > 80 
+                                        ? 80 
+                                        : process.stdout.columns;
 }
 
 function drawString(options) {
@@ -74,8 +94,8 @@ function updateStatusArea() {
     drawString({y:4, x:4, str:'30/30', color:GameOptions.ColorCodes.Green});
     drawString({y:6, x:4, str:Array(11).join('\u00bb'), color:GameOptions.ColorCodes.BrightBlue});
     drawString({y:7, x:4, str:'10/10', color:GameOptions.ColorCodes.Blue});
-    for (var i = 1; i < 19; i++) {
-        drawString({y:i, x:15, str:'\u2502', color:GameOptions.ColorCodes.Gray});
+    for (var i = 1; i <= screenBuffer.statusArea.bottom; i++) {
+        drawString({y:i, x:screenBuffer.statusArea.right + 1, str:'\u2502', color:GameOptions.ColorCodes.Gray});
     }
     flushScreenBuffer();
 }
@@ -86,8 +106,8 @@ function updateMapArea() {
     var playerY = screenBuffer.mapArea.top +
         Math.floor((screenBuffer.mapArea.bottom - screenBuffer.mapArea.top) / 2);
 
-    for(var x = screenBuffer.mapArea.left; x < screenBuffer.mapArea.right; x++) {
-        for(var y = screenBuffer.mapArea.top; y < screenBuffer.mapArea.bottom; y++) {
+    for(var x = screenBuffer.mapArea.left; x <= screenBuffer.mapArea.right; x++) {
+        for(var y = screenBuffer.mapArea.top; y <= screenBuffer.mapArea.bottom; y++) {
             var tile = game.getTile((playerY - y),-1*(playerX - x));
             var printable = getPrintable(tile);
 
@@ -119,29 +139,43 @@ function updateMapArea() {
         str:'@', 
         color:GameOptions.ColorCodes[GameOptions.Colors.Player]
     });
+    // TODO: remove this 
     drawString({
         x: 1,
         y: 30,
         str:'('+game.playerLocation.x+', '+game.playerLocation.y + ')    '
     });
-    /*
-    drawString({
-        x:playerX+1, 
-        y:playerY, 
-        str:'r', 
-        color:GameOptions.ColorCodes.BrightWhite
-    });
-    */
     
     flushScreenBuffer();
 }
 
-function updateMessageArea() {
-    /*
-    drawString({y:20, x:1, str:'You hit the rat!', color:GameOptions.ColorCodes.BrightRed});
-    drawString({y:21, x:1, str:'The rat bites you!', color:GameOptions.ColorCodes.Red});
-    drawString({y:22, x:1, str:'You found a short sword', color:GameOptions.ColorCodes.White});
-    */
+function updateMessageArea(message) {
+    for(var i = screenBuffer.messageArea.left; i <= screenBuffer.messageArea.right; i++) {
+        drawString({
+            y: screenBuffer.messageArea.top -1,
+            x: i,
+            str: '\u2500',
+            color: GameOptions.ColorCodes.Gray
+        });
+    }
+
+    // add tee to join lines between status and message areas
+    drawString({
+        y: screenBuffer.statusArea.bottom + 1,
+        x: screenBuffer.statusArea.right + 1,
+        str: '\u2534',
+        color:GameOptions.ColorCodes.Gray
+    });
+    if (message && message.length > 0) {
+        drawString({
+            y: screenBuffer.messageArea.top,
+            x: screenBuffer.messageArea.left,
+            str: message + '             ',
+            color: GameOptions.ColorCodes.Red
+        });
+    }
+
+    flushScreenBuffer();
 }
 
 function redrawScreen() {
@@ -183,21 +217,24 @@ function handleInput(character) {
     } catch (err) {
         var cleanupMsg = escapeString + '[2J';
         cleanupMsg += escapeString + '[H';
-        cleanupMessage += escapeString + GameOptions.ColorCodes.Default;
-        cleanupMessage += escapeString + '[?25h';
+        cleanupMsg += escapeString + GameOptions.ColorCodes.Default;
+        cleanupMsg += escapeString + '[?25h';
         console.log(cleanupMsg);
         console.log(err);
+        process.exit(1);
     }
 }
 
-process.stdout.write('\033[?25l');
 var game = new Game();
 game.on('map_updated', updateMapArea);
+game.on('message', updateMessageArea);
+game.start();
+
+process.stdout.on('resize', redrawScreen);
+process.stdout.write('\033[?25l');
 
 process.stdin.setRawMode(true);
+process.stdin.on('data', handleInput);
 
 redrawScreen();
 
-process.stdout.on('resize', redrawScreen);
-
-process.stdin.on('data', handleInput);
